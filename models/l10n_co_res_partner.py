@@ -166,7 +166,8 @@ class PartnerInfoExtended(models.Model):
         """
         # Executing only for Document Type 31 (NIT)
         for partner in self:
-            if partner.doctype is "31":
+
+            if partner.doctype == "31":
                 # First check if entered value is valid
                 self._check_ident()
                 self._check_ident_num()
@@ -199,6 +200,8 @@ class PartnerInfoExtended(models.Model):
                     # Saving Verification digit in a proper field
                     for pnitem in self:
                         pnitem.dv = nitList[1]
+
+                    _logger.info(partner.formatedNit)
 
     @api.onchange('x_name1', 'x_name2', 'x_lastname1', 'x_lastname2', 'companyName', 'pos_name', 'companyBrandName')
     def _concat_name(self):
@@ -280,13 +283,13 @@ class PartnerInfoExtended(models.Model):
         contact cleaner and ready for analysis
         @return: void
         """
-        if self.personType is "2":
+        if self.personType == "2":
             self.x_name1 = ''
             self.x_name2 = ''
             self.x_lastname1 = ''
             self.x_lastname2 = ''
             self.x_pn_retri = "7"
-        elif self.personType is "1":
+        elif self.personType == "1":
             self.companyName = False
             self.companyBrandName = False
             self.x_pn_retri = False
@@ -326,7 +329,7 @@ class PartnerInfoExtended(models.Model):
         checked / unchecked
         @return: void
         """
-        if self.is_company is True:
+        if self.is_company:
             self.personType = "2"
             self.company_type = 'company'
             self.xbirthday = False
@@ -341,7 +344,7 @@ class PartnerInfoExtended(models.Model):
         checked / unchecked
         @return: void
         """
-        if self.change_country is True:
+        if self.change_country:
             self.country_id = False
             self.state_id = False
             self.xcity = False
@@ -410,7 +413,7 @@ class PartnerInfoExtended(models.Model):
         @return: void
         """
         for item in self:
-            if item.doctype is not "1":
+            if item.doctype != "1":
                 msg = _('Error! Number of digits in Identification number must be'
                         'between 2 and 12')
                 if len(str(item.xidentification)) < 2:
@@ -428,7 +431,7 @@ class PartnerInfoExtended(models.Model):
         @return: void
         """
         for item in self:
-            if item.doctype is not "1":
+            if item.doctype != "1":
                 if item.xidentification is not False and \
                         item.doctype != "21" and \
                         item.doctype != "41":
@@ -443,11 +446,11 @@ class PartnerInfoExtended(models.Model):
         This function throws and error if there is no document type selected.
         @return: void
         """
-        if self.doctype is not "1":
-            if self.doctype is False:
+        if self.doctype != "1":
+            if not self.doctype:
                 msg = _('Error! Please choose an identification type')
                 raise exceptions.ValidationError(msg)
-            elif self.xidentification is False and self.doctype is not "43":
+            elif not self.xidentification and self.doctype != "43":
                 msg = _('Error! Identification number is mandatory')
                 raise exceptions.ValidationError(msg)
 
@@ -457,21 +460,21 @@ class PartnerInfoExtended(models.Model):
         Double check: Although validation is checked within the frontend (xml)
         we check it again to get sure
         """
-        if self.is_company is True:
-            if self.personType is "1":
-                if self.x_name1 is False or self.x_name1 == '':
+        if self.is_company:
+            if self.personType == "1":
+                if not self.x_name1 or self.x_name1 == '':
                     msg = _('Error! Please enter the persons name')
                     raise exceptions.ValidationError(msg)
-            elif self.personType is "2":
-                if self.companyName is False:
+            elif self.personType == "2":
+                if not self.companyName:
                     msg = _('Error! Please enter the companys name')
                     raise exceptions.ValidationError(msg)
         elif self.type == 'delivery':
-            if self.pos_name is False or self.pos_name == '':
+            if not self.pos_name or self.pos_name == '':
                 msg = _('Error! Please enter the persons name')
                 raise exceptions.ValidationError(msg)
         else:
-            if self.x_name1 is False or self.x_name1 == '':
+            if not self.x_name1 or self.x_name1 == '':
                 msg = _('Error! Please enter the name of the person')
                 raise exceptions.ValidationError(msg)
 
@@ -481,7 +484,7 @@ class PartnerInfoExtended(models.Model):
         This function checks if the person type is not empty
         @return: void
         """
-        if self.personType is False:
+        if not self.personType:
             msg = _('Error! Please select a person type')
             raise exceptions.ValidationError(msg)
 
